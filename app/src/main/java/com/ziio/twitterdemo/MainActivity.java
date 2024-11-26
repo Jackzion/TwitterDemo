@@ -78,7 +78,6 @@ public class MainActivity extends AppCompatActivity {
             public void onSuccess(CosXmlRequest request, CosXmlResult result) {
                 COSXMLUploadTask.COSXMLUploadTaskResult uploadResult =
                         (COSXMLUploadTask.COSXMLUploadTaskResult) result;
-                Toast.makeText(context,"success to upload" , Toast.LENGTH_LONG).show();
             }
             // 如果您使用 kotlin 语言来调用，请注意回调方法中的异常是可空的，否则不会回调 onFail 方法，即：
             // clientException 的类型为 CosXmlClientException?，serviceException 的类型为 CosXmlServiceException?
@@ -87,13 +86,13 @@ public class MainActivity extends AppCompatActivity {
                                @Nullable CosXmlClientException clientException,
                                @Nullable CosXmlServiceException serviceException) {
                 if (clientException != null) {
-                    Toast.makeText(context,"fail to upload" , Toast.LENGTH_LONG).show();
                     clientException.printStackTrace();
                 } else {
                     serviceException.printStackTrace();
                 }
             }
         });
+
     }
 
 }

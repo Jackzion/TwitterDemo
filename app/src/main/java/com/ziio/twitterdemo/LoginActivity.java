@@ -13,6 +13,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.MediaStore;
+import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -32,6 +33,8 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 import com.tencent.cos.xml.exception.CosXmlClientException;
 import com.tencent.cos.xml.exception.CosXmlServiceException;
 import com.tencent.cos.xml.listener.CosXmlResultListener;
@@ -61,17 +64,35 @@ public class LoginActivity extends AppCompatActivity implements OnCompleteListen
 
     private FirebaseAuth mAuth = null;
 
+    private FirebaseDatabase firebaseDatabase;
+
+    private DatabaseReference myRef;
+
     private CosClient cosClient;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
+        // init fireBase
         mAuth = FirebaseAuth.getInstance();
+//        firebaseDatabase = FirebaseDatabase.getInstance();
+//        myRef = firebaseDatabase.getReference();
+        // component init
         ivImagePerson = findViewById(R.id.ivImagePerson);
         edEmail = findViewById(R.id.edEmail);
         edPassword = findViewById(R.id.edPassword);
         cosClient = new CosClient(this);
+        View buLogin = findViewById(R.id.buLogin);
+
+        buLogin.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                loginToFireBase(edEmail.getText().toString(),edPassword.getText().toString());
+                // Activity 跳转
+                loadTweets();
+            }
+        });
 
         ivImagePerson.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -139,9 +160,10 @@ public class LoginActivity extends AppCompatActivity implements OnCompleteListen
             public void onSuccess(CosXmlRequest request, CosXmlResult result) {
                 COSXMLUploadTask.COSXMLUploadTaskResult uploadResult =
                         (COSXMLUploadTask.COSXMLUploadTaskResult) result;
-                Toast.makeText(context,"success to upload" , Toast.LENGTH_LONG).show();
-                // Activity 跳转
-                loadTweets();
+                Log.d("ziio",result.accessUrl);
+                // 保存到 fireDatabase
+//                myRef.child("Users").child(currentUser.getUid()).child("email").setValue(currentUser.getEmail());
+//                myRef.child("Users").child(currentUser.getUid()).child("profileImage").setValue(result.accessUrl);
             }
             // 如果您使用 kotlin 语言来调用，请注意回调方法中的异常是可空的，否则不会回调 onFail 方法，即：
             // clientException 的类型为 CosXmlClientException?，serviceException 的类型为 CosXmlServiceException?
@@ -213,9 +235,6 @@ public class LoginActivity extends AppCompatActivity implements OnCompleteListen
         activityResultLauncher.launch(intent);
     }
 
-    void buLogin(View view){
-        loginToFireBase(edEmail.getText().toString(),edPassword.getText().toString());
-    }
 
     @Override
     public void onComplete(@NonNull Task<AuthResult> task) {

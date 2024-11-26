@@ -51,7 +51,6 @@
         android:layout_height="55dp"
         android:layout_marginTop="56dp"
         android:background="@color/green"
-        android:onClick="buLogin"
         android:text="Login"
         android:textColor="#212121"
         app:layout_constraintEnd_toEndOf="parent"
