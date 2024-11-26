@@ -10,9 +10,7 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
-import android.widget.Toast;
 
-import com.google.firebase.auth.FirebaseUser;
 import com.tencent.cos.xml.exception.CosXmlClientException;
 import com.tencent.cos.xml.exception.CosXmlServiceException;
 import com.tencent.cos.xml.listener.CosXmlResultListener;
@@ -21,8 +19,7 @@ import com.tencent.cos.xml.model.CosXmlResult;
 import com.tencent.cos.xml.transfer.COSXMLUploadTask;
 import com.tencent.cos.xml.transfer.TransferManager;
 import com.ziio.twitterdemo.cos.CosClient;
-import com.ziio.twitterdemo.cosntant.CosConstant;
-import com.ziio.twitterdemo.util.StringUtil;
+import com.ziio.twitterdemo.config.CosConfig;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -71,7 +68,7 @@ public class MainActivity extends AppCompatActivity {
         TransferManager transferManager = cosClient.getTransferManager();
         Context context = cosClient.getContext();
         // 上传字节数组
-        COSXMLUploadTask cosxmlUploadTask = transferManager.upload(CosConstant.BUCKET, cosPath, data);
+        COSXMLUploadTask cosxmlUploadTask = transferManager.upload(CosConfig.BUCKET, cosPath, data);
         //设置返回结果回调
         cosxmlUploadTask.setCosXmlResultListener(new CosXmlResultListener() {
             @Override

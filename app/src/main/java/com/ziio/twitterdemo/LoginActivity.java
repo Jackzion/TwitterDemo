@@ -43,8 +43,7 @@ import com.tencent.cos.xml.model.CosXmlResult;
 import com.tencent.cos.xml.transfer.COSXMLUploadTask;
 import com.tencent.cos.xml.transfer.TransferManager;
 import com.ziio.twitterdemo.cos.CosClient;
-import com.ziio.twitterdemo.cos.CosManager;
-import com.ziio.twitterdemo.cosntant.CosConstant;
+import com.ziio.twitterdemo.config.CosConfig;
 import com.ziio.twitterdemo.util.StringUtil;
 
 import java.io.ByteArrayOutputStream;
@@ -153,7 +152,7 @@ public class LoginActivity extends AppCompatActivity implements OnCompleteListen
         TransferManager transferManager = cosClient.getTransferManager();
         Context context = cosClient.getContext();
         // 上传字节数组
-        COSXMLUploadTask cosxmlUploadTask = transferManager.upload(CosConstant.BUCKET, cosPath, data);
+        COSXMLUploadTask cosxmlUploadTask = transferManager.upload(CosConfig.BUCKET, cosPath, data);
         //设置返回结果回调
         cosxmlUploadTask.setCosXmlResultListener(new CosXmlResultListener() {
             @Override

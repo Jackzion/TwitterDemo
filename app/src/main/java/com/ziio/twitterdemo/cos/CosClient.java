@@ -8,7 +8,7 @@ import com.tencent.cos.xml.transfer.TransferConfig;
 import com.tencent.cos.xml.transfer.TransferManager;
 import com.tencent.qcloud.core.auth.QCloudCredentialProvider;
 import com.tencent.qcloud.core.auth.ShortTimeCredentialProvider;
-import com.ziio.twitterdemo.cosntant.CosConstant;
+import com.ziio.twitterdemo.config.CosConfig;
 
 /**
  *  构建 TransferManager 单例
@@ -21,10 +21,10 @@ public class CosClient {
 
     public CosClient(Context context) {
         this.context = context;
-        String secretId = CosConstant.SECRETID; // 替换为你的SecretId
-        String secretKey = CosConstant.SECRETKEY; // 替换为你的SecretKey
+        String secretId = CosConfig.SECRETID; // 替换为你的SecretId
+        String secretKey = CosConfig.SECRETKEY; // 替换为你的SecretKey
         // 存储桶所在地域简称，例如广州地区是 ap-guangzhou
-        String region = CosConstant.REGION;
+        String region = CosConfig.REGION;
         QCloudCredentialProvider myCredentialProvider =
                 new ShortTimeCredentialProvider(secretId, secretKey, 300);
         // 创建 CosXmlServiceConfig 对象，根据需要修改默认的配置参数
