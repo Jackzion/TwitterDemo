@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "335472014673",
+    "project_id": "twitterj0330",
+    "storage_bucket": "twitterj0330.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:335472014673:android:258872292f57c78b2a4f70",
+        "android_client_info": {
+          "package_name": "com.ziio.twitterdemo"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB8U9e61zoVpX2B913wWWtg8VGD7X8xcq0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
