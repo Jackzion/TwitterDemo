@@ -2,15 +2,20 @@ package com.ziio.twitterdemo;
 
 import android.Manifest;
 import android.content.ContentResolver;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
+import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.MediaStore;
+import android.util.Log;
 import android.view.View;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Toast;
 
@@ -19,6 +24,7 @@ import androidx.activity.result.ActivityResultCallback;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 
@@ -27,21 +33,66 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.tencent.cos.xml.exception.CosXmlClientException;
+import com.tencent.cos.xml.exception.CosXmlServiceException;
+import com.tencent.cos.xml.listener.CosXmlResultListener;
+import com.tencent.cos.xml.model.CosXmlRequest;
+import com.tencent.cos.xml.model.CosXmlResult;
+import com.tencent.cos.xml.transfer.COSXMLUploadTask;
+import com.tencent.cos.xml.transfer.TransferManager;
+import com.ziio.twitterdemo.cos.CosClient;
+import com.ziio.twitterdemo.cos.CosManager;
+import com.ziio.twitterdemo.cosntant.CosConstant;
+import com.ziio.twitterdemo.util.StringUtil;
 
-public class LoginActivity extends AppCompatActivity {
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
+public class LoginActivity extends AppCompatActivity implements OnCompleteListener<AuthResult> {
 
     private ActivityResultLauncher<Intent> activityResultLauncher;
 
     private ImageView ivImagePerson;
 
+    private EditText edEmail;
+
+    private EditText edPassword;
+
     private FirebaseAuth mAuth = null;
+
+    private FirebaseDatabase firebaseDatabase;
+
+    private DatabaseReference myRef;
+
+    private CosClient cosClient;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
+        // init fireBase
         mAuth = FirebaseAuth.getInstance();
+//        firebaseDatabase = FirebaseDatabase.getInstance();
+//        myRef = firebaseDatabase.getReference();
+        // component init
         ivImagePerson = findViewById(R.id.ivImagePerson);
+        edEmail = findViewById(R.id.edEmail);
+        edPassword = findViewById(R.id.edPassword);
+        cosClient = new CosClient(this);
+        View buLogin = findViewById(R.id.buLogin);
+
+        buLogin.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                loginToFireBase(edEmail.getText().toString(),edPassword.getText().toString());
+                // Activity 跳转
+                loadTweets();
+            }
+        });
 
         ivImagePerson.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -74,22 +125,81 @@ public class LoginActivity extends AppCompatActivity {
     private void loginToFireBase(String email ,String password){
         if(mAuth!=null){
             mAuth.createUserWithEmailAndPassword(email,password)
-                    .addOnCompleteListener(new OnCompleteListener<AuthResult>() {
-                        @Override
-                        public void onComplete(@NonNull Task<AuthResult> task) {
-                            if(task.isSuccessful()){
-                                Toast.makeText(getApplicationContext(),"Successfully Login" , Toast.LENGTH_LONG).show();
-                                if(mAuth!=null){
-                                    FirebaseUser currentUser = mAuth.getCurrentUser();
-                                }
-                            }else{
-                                Toast.makeText(getApplicationContext(),"Fail to login" , Toast.LENGTH_LONG).show();
-                            }
-                        }
-                    });
+                    .addOnCompleteListener(this);
         }
     }
 
+    // 存储选中照片到 cos
+    private void saveImageInCos(FirebaseUser currentUser) {
+        // 生成目标路径
+        String email = currentUser.getEmail();
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("ddMMyyHHmmss");
+        String rootPath = "twitter";
+        String emailId = StringUtil.splitEmail(email);
+        Date date = new Date();
+        String imagePath =simpleDateFormat.format(date) + ".jpg";
+        String cosPath = rootPath + File.separator + emailId + File.separator + imagePath;
+
+        // 获取 ivImagePerson 图片字节流
+        ivImagePerson.isDrawingCacheEnabled();
+        ivImagePerson.buildDrawingCache();
+        BitmapDrawable drawable = (BitmapDrawable)ivImagePerson.getDrawable();
+        Bitmap bitmap = drawable.getBitmap();
+        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+        bitmap.compress(Bitmap.CompressFormat.JPEG,100,byteArrayOutputStream);
+        byte[] data = byteArrayOutputStream.toByteArray();
+
+        // 上传 cos
+        TransferManager transferManager = cosClient.getTransferManager();
+        Context context = cosClient.getContext();
+        // 上传字节数组
+        COSXMLUploadTask cosxmlUploadTask = transferManager.upload(CosConstant.BUCKET, cosPath, data);
+        //设置返回结果回调
+        cosxmlUploadTask.setCosXmlResultListener(new CosXmlResultListener() {
+            @Override
+            public void onSuccess(CosXmlRequest request, CosXmlResult result) {
+                COSXMLUploadTask.COSXMLUploadTaskResult uploadResult =
+                        (COSXMLUploadTask.COSXMLUploadTaskResult) result;
+                Log.d("ziio",result.accessUrl);
+                // 保存到 fireDatabase
+//                myRef.child("Users").child(currentUser.getUid()).child("email").setValue(currentUser.getEmail());
+//                myRef.child("Users").child(currentUser.getUid()).child("profileImage").setValue(result.accessUrl);
+            }
+            // 如果您使用 kotlin 语言来调用，请注意回调方法中的异常是可空的，否则不会回调 onFail 方法，即：
+            // clientException 的类型为 CosXmlClientException?，serviceException 的类型为 CosXmlServiceException?
+            @Override
+            public void onFail(CosXmlRequest request,
+                               @Nullable CosXmlClientException clientException,
+                               @Nullable CosXmlServiceException serviceException) {
+                if (clientException != null) {
+                    Toast.makeText(context,"fail to upload" , Toast.LENGTH_LONG).show();
+                    clientException.printStackTrace();
+                } else {
+                    serviceException.printStackTrace();
+                }
+            }
+        });
+    }
+
+//    @Override
+//    protected void onStart() {
+//        super.onStart();
+//        loadTweets();
+//    }
+
+    // 跳转页面
+    private void loadTweets(){
+        FirebaseUser currentUser = mAuth.getCurrentUser();
+        if(currentUser!=null){
+            Intent intent = new Intent(this, MainActivity.class);
+            intent.putExtra("email",currentUser.getEmail());
+            intent.putExtra("uid",currentUser.getProviderId());
+
+            startActivity(intent);
+        }
+    }
+
+    // 动态授权（读取图片）
     final int READIMAGE = 253;
     private void checkPermission(){
         if(Build.VERSION.SDK_INT>=23){
@@ -125,7 +235,17 @@ public class LoginActivity extends AppCompatActivity {
         activityResultLauncher.launch(intent);
     }
 
-    void buLogin(View view){
-        loginToFireBase();
+
+    @Override
+    public void onComplete(@NonNull Task<AuthResult> task) {
+        if(task.isSuccessful()){
+            Toast.makeText(this,"Successfully Login" , Toast.LENGTH_LONG).show();
+            if(mAuth!=null){
+                FirebaseUser currentUser = mAuth.getCurrentUser();
+                saveImageInCos(currentUser);
+            }
+        }else{
+            Toast.makeText(this,"Fail to login" , Toast.LENGTH_LONG).show();
+        }
     }
 }
