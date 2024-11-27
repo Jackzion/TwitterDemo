@@ -97,7 +97,7 @@ public class LoginActivity extends AppCompatActivity implements OnCompleteListen
         ivImagePerson.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                // todo : select image from phone
+                // select image from phone
                 checkPermission();
             }
         });
@@ -122,6 +122,7 @@ public class LoginActivity extends AppCompatActivity implements OnCompleteListen
         });
     }
 
+    // login to fireBase by fireAuth
     private void loginToFireBase(String email ,String password){
         if(mAuth!=null){
             mAuth.createUserWithEmailAndPassword(email,password)
@@ -232,7 +233,6 @@ public class LoginActivity extends AppCompatActivity implements OnCompleteListen
     }
 
     private void loadImage() {
-        // todo:load image
         Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
         activityResultLauncher.launch(intent);
     }
