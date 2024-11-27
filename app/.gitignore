@@ -1,3 +1,3 @@
 /build
-/google-services.json
+*.json
 /src/main/java/com/ziio/twitterdemo/config
