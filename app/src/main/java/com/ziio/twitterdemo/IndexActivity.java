@@ -83,8 +83,8 @@ public class IndexActivity extends AppCompatActivity {
         // bundle
         Intent intent = getIntent();
         Bundle bundle = intent.getExtras();
-        myEmail = "ziio";
-        userUID = "615644646";
+        myEmail = bundle.getString("email");
+        userUID = bundle.getString("uid");
 
         // init cosClient
         cosClient = new CosClient(this);
@@ -93,7 +93,6 @@ public class IndexActivity extends AppCompatActivity {
         myRef = firebaseDatabase.getReference();
         // dummy data
         ticketList.add(new Ticket("0" , "him" , "url" , "add"));
-        ticketList.add(new Ticket("0" , "him" , "url" , "ziio"));
         // set listView Adapter
         adapter = new MyTweetAdapter(ticketList,this);
         lvTweets.setAdapter(adapter);
@@ -170,7 +169,12 @@ public class IndexActivity extends AppCompatActivity {
                     }
                 });
                 return myView;
-            }else{
+            }
+            else if(myTweet.getTweetPersonUID().equals("loading")){
+                View myView = LayoutInflater.from(context).inflate(R.layout.loading_ticket, null);
+                return myView;
+            }
+            else{
                 View myView = LayoutInflater.from(context).inflate(R.layout.tweets_ticket, null);
                 // load tweet ticket
                 TextView tweetText = myView.findViewById(R.id.txt_tweet);
@@ -178,30 +182,23 @@ public class IndexActivity extends AppCompatActivity {
                 tweetText.setText(myTweet.getTweetText());
                 Picasso.with(context).load(myTweet.getTweetImageURL()).into(tweetImageView);
                 // load userInfo
-                ImageView ivImagePerson = myView.findViewById(R.id.ivImagePerson);
+                ImageView tweet_profilePic = myView.findViewById(R.id.tweet_profilePic);
                 TextView txtUserName = myView.findViewById(R.id.txtUserName);
-                myRef.child("Users").child(myTweet.getTweetID())
+                myRef.child("Users").child(myTweet.getTweetPersonUID())
                         .addValueEventListener(new ValueEventListener() {
                             @Override
                             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                                try {
-                                    // update the list
-                                    HashMap<String , Object> map = (HashMap<String , Object>)dataSnapshot.getValue();
-                                    for(String key : map.keySet()){
-                                        String value = (String)map.get(key);
-                                        if(key.equals("profileImage")){
-                                            Picasso.with(context).load(value).into(ivImagePerson);
-                                        }else{
-                                            txtUserName.setText(value);
-                                        }
+                                // update the list
+                                HashMap<String , Object> map = (HashMap<String , Object>)dataSnapshot.getValue();
+                                for(String key : map.keySet()){
+                                    String value = (String)map.get(key);
+                                    if(key.equals("profileImage")){
+                                        Picasso.with(context).load(value).into(tweet_profilePic);
+                                    }else{
+                                        txtUserName.setText(value);
                                     }
-                                    // update the View
-                                    adapter.notifyDataSetChanged();
-                                }catch (Exception exception){
-
                                 }
                             }
-
                             @Override
                             public void onCancelled(@NonNull DatabaseError databaseError) {
 
@@ -218,6 +215,9 @@ public class IndexActivity extends AppCompatActivity {
 
     private String pictureURL;
     private void uploadImage(Bitmap bitmap) {
+        // loading 。。
+        ticketList.add(0,new Ticket("0","him","url","loading"));
+        adapter.notifyDataSetChanged();
         // 生成目标路径
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("ddMMyyHHmmss");
         String rootPath = "imagePost";
@@ -244,6 +244,16 @@ public class IndexActivity extends AppCompatActivity {
                         (COSXMLUploadTask.COSXMLUploadTaskResult) result;
                 // public the pictureURL
                 pictureURL = result.accessUrl;
+                ticketList.remove(0);
+                // run on UI Thread
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        Toast.makeText(context,"success to upload",Toast.LENGTH_LONG);
+                        // 更新 UI
+                        adapter.notifyDataSetChanged();
+                    }
+                });
             }
             // 如果您使用 kotlin 语言来调用，请注意回调方法中的异常是可空的，否则不会回调 onFail 方法，即：
             // clientException 的类型为 CosXmlClientException?，serviceException 的类型为 CosXmlServiceException?
@@ -252,11 +262,19 @@ public class IndexActivity extends AppCompatActivity {
                                @Nullable CosXmlClientException clientException,
                                @Nullable CosXmlServiceException serviceException) {
                 if (clientException != null) {
-                    Toast.makeText(context,"fail to upload" , Toast.LENGTH_LONG).show();
                     clientException.printStackTrace();
                 } else {
                     serviceException.printStackTrace();
                 }
+                ticketList.remove(0);
+                // run on UI Thread
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        Toast.makeText(context,"fail to upload" , Toast.LENGTH_LONG).show();
+                        adapter.notifyDataSetChanged();
+                    }
+                });
             }
         });
     }
