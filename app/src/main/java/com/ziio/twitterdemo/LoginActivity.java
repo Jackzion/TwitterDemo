@@ -42,6 +42,7 @@ import com.tencent.cos.xml.model.CosXmlRequest;
 import com.tencent.cos.xml.model.CosXmlResult;
 import com.tencent.cos.xml.transfer.COSXMLUploadTask;
 import com.tencent.cos.xml.transfer.TransferManager;
+import com.ziio.twitterdemo.config.GoogleConfig;
 import com.ziio.twitterdemo.cos.CosClient;
 import com.ziio.twitterdemo.config.CosConfig;
 import com.ziio.twitterdemo.util.StringUtil;
@@ -75,8 +76,8 @@ public class LoginActivity extends AppCompatActivity implements OnCompleteListen
         setContentView(R.layout.activity_login);
         // init fireBase
         mAuth = FirebaseAuth.getInstance();
-//        firebaseDatabase = FirebaseDatabase.getInstance();
-//        myRef = firebaseDatabase.getReference();
+        firebaseDatabase = FirebaseDatabase.getInstance(GoogleConfig.REALTIME_DATABASE_URL);
+        myRef = firebaseDatabase.getReference();
         // component init
         ivImagePerson = findViewById(R.id.ivImagePerson);
         edEmail = findViewById(R.id.edEmail);
@@ -88,8 +89,6 @@ public class LoginActivity extends AppCompatActivity implements OnCompleteListen
             @Override
             public void onClick(View view) {
                 loginToFireBase(edEmail.getText().toString(),edPassword.getText().toString());
-                // Activity 跳转
-                loadTweets();
             }
         });
 
@@ -159,10 +158,12 @@ public class LoginActivity extends AppCompatActivity implements OnCompleteListen
             public void onSuccess(CosXmlRequest request, CosXmlResult result) {
                 COSXMLUploadTask.COSXMLUploadTaskResult uploadResult =
                         (COSXMLUploadTask.COSXMLUploadTaskResult) result;
-                Log.d("ziio",result.accessUrl);
+                System.out.println("ziio"+ result.accessUrl);
                 // 保存到 fireDatabase
-//                myRef.child("Users").child(currentUser.getUid()).child("email").setValue(currentUser.getEmail());
-//                myRef.child("Users").child(currentUser.getUid()).child("profileImage").setValue(result.accessUrl);
+                myRef.child("Users").child(currentUser.getUid()).child("email").setValue(currentUser.getEmail());
+                myRef.child("Users").child(currentUser.getUid()).child("profileImage").setValue(result.accessUrl);
+                // Activity 跳转
+                loadTweets();
             }
             // 如果您使用 kotlin 语言来调用，请注意回调方法中的异常是可空的，否则不会回调 onFail 方法，即：
             // clientException 的类型为 CosXmlClientException?，serviceException 的类型为 CosXmlServiceException?
