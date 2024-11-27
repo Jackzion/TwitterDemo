@@ -9,7 +9,6 @@
     android:background="@color/whitebackground"
     android:layoutDirection="rtl"
     android:textAlignment="center"
-
     android:focusable="false"
     android:focusableInTouchMode="false"
     >
@@ -23,8 +22,8 @@
         android:textAlignment="center"
         android:layout_marginRight="10dp"
         android:layout_marginLeft="10dp"
-        android:layout_marginTop="5dp"
-        android:paddingRight="5dp"
+        android:layout_marginTop="10dp"
+        android:paddingRight="10dp"
         android:background="@drawable/background"
         android:paddingTop="2dp"
         android:paddingBottom="1dp"
@@ -49,16 +48,15 @@
 
             <ImageView
                 android:id="@+id/tweet_profilePic"
-                android:layout_width="50px"
-                android:layout_height="50px"
+                android:layout_width="80px"
+                android:layout_height="80px"
                 android:layout_alignBottom="@+id/txtflollower"
                 android:layout_alignParentEnd="true"
                 android:layout_alignParentRight="true"
                 android:layout_alignParentTop="true"
                 android:layout_weight="0"
                 android:background="@color/lowDarkfont"
-
-
+                android:layout_marginRight="5dp"
                 android:src="@drawable/persoicon" />
 
             <TextView
@@ -78,7 +76,7 @@
                 android:text="User name"
                 android:textAppearance="?android:attr/textAppearanceLarge"
                 android:textColor="#1976D2"
-                android:textSize="12dp"
+                android:textSize="15dp"
                 android:textStyle="bold" />
 
             <TextView
@@ -89,7 +87,7 @@
                 android:layout_height="wrap_content"
                 android:textAppearance="?android:attr/textAppearanceSmall"
                 android:text="2015-12-11"
-                android:textSize="10dp"
+                android:textSize="12dp"
 
                 android:id="@+id/txt_tweet_date" />
 
@@ -146,12 +144,11 @@
             android:layout_height="match_parent">
 
             <ImageView
-
                 android:layout_width="25dp"
                 android:layout_height="25dp"
-                android:id="@+id/iv_share"
-                android:layout_marginRight="8dp"
-                android:background="@drawable/ic_favorite_border_black_24dp" />
+                android:id="@+id/iv_like"
+                android:layout_marginRight="10dp"
+                android:background="@drawable/like" />
 
         </LinearLayout>
 

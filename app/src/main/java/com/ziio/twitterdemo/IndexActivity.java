@@ -217,6 +217,18 @@ public class IndexActivity extends AppCompatActivity {
 
                             }
                         });
+                // load like icon
+                ImageView ivLike = myView.findViewById(R.id.iv_like);
+                ivLike.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        if(ivLike.getDrawable().getConstantState() == getResources().getDrawable(R.drawable.like).getConstantState()){
+                            ivLike.setImageResource(R.drawable.dolike);
+                        }else{
+                            ivLike.setImageResource(R.drawable.like);
+                        }
+                    }
+                });
                 return myView;
             }
         }
