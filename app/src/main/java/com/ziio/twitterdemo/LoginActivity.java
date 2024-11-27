@@ -45,12 +45,14 @@ import com.tencent.cos.xml.transfer.TransferManager;
 import com.ziio.twitterdemo.config.GoogleConfig;
 import com.ziio.twitterdemo.cos.CosClient;
 import com.ziio.twitterdemo.config.CosConfig;
+import com.ziio.twitterdemo.model.Ticket;
 import com.ziio.twitterdemo.util.StringUtil;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.List;
 
 public class LoginActivity extends AppCompatActivity implements OnCompleteListener<AuthResult> {
 
