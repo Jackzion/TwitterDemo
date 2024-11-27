@@ -8,6 +8,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.app.Application;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
@@ -48,6 +49,7 @@ import com.tencent.cos.xml.model.CosXmlRequest;
 import com.tencent.cos.xml.model.CosXmlResult;
 import com.tencent.cos.xml.transfer.COSXMLUploadTask;
 import com.tencent.cos.xml.transfer.TransferManager;
+import com.tencent.cos.xml.utils.StringUtils;
 import com.ziio.twitterdemo.config.CosConfig;
 import com.ziio.twitterdemo.config.GoogleConfig;
 import com.ziio.twitterdemo.cos.CosClient;
@@ -156,14 +158,18 @@ public class IndexActivity extends AppCompatActivity {
             Ticket myTweet = listNotesAdapter.get(i);
             if(myTweet.getTweetPersonUID().equals("add")){
                 View myView = LayoutInflater.from(context).inflate(R.layout.add_ticket, null);
+                MyApplication mApp = MyApplication.getInstance();
                 // load add ticket
                 EditText etPost = myView.findViewById(R.id.etPost);
+                if(!StringUtils.isEmpty(mApp.infoMap.get("etPost"))){
+                    etPost.setText(mApp.infoMap.get("etPost"));
+                }
                 ImageView ivAttach = myView.findViewById(R.id.iv_attach);
                 ivAttach.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
-                        // save the text you write
-                        
+                        // save the text you write in Application
+                        mApp.infoMap.put("etPost",etPost.getText().toString());
                         // load the image
                         loadImage();
                     }
