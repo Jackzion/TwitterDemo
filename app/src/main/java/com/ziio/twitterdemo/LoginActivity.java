@@ -33,8 +33,11 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 import com.tencent.cos.xml.exception.CosXmlClientException;
 import com.tencent.cos.xml.exception.CosXmlServiceException;
 import com.tencent.cos.xml.listener.CosXmlResultListener;
@@ -52,6 +55,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 
 public class LoginActivity extends AppCompatActivity implements OnCompleteListener<AuthResult> {
@@ -194,9 +198,9 @@ public class LoginActivity extends AppCompatActivity implements OnCompleteListen
     private void loadTweets(){
         FirebaseUser currentUser = mAuth.getCurrentUser();
         if(currentUser!=null){
-            Intent intent = new Intent(this, MainActivity.class);
+            Intent intent = new Intent(this, IndexActivity.class);
             intent.putExtra("email",currentUser.getEmail());
-            intent.putExtra("uid",currentUser.getProviderId());
+            intent.putExtra("uid",currentUser.getUid());
 
             startActivity(intent);
         }
@@ -236,7 +240,6 @@ public class LoginActivity extends AppCompatActivity implements OnCompleteListen
         Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
         activityResultLauncher.launch(intent);
     }
-
 
     @Override
     public void onComplete(@NonNull Task<AuthResult> task) {

@@ -24,12 +24,19 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Adapter;
 import android.widget.BaseAdapter;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ListView;
+import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
+import com.squareup.picasso.Picasso;
 import com.tencent.cos.xml.exception.CosXmlClientException;
 import com.tencent.cos.xml.exception.CosXmlServiceException;
 import com.tencent.cos.xml.listener.CosXmlResultListener;
@@ -38,7 +45,9 @@ import com.tencent.cos.xml.model.CosXmlResult;
 import com.tencent.cos.xml.transfer.COSXMLUploadTask;
 import com.tencent.cos.xml.transfer.TransferManager;
 import com.ziio.twitterdemo.config.CosConfig;
+import com.ziio.twitterdemo.config.GoogleConfig;
 import com.ziio.twitterdemo.cos.CosClient;
+import com.ziio.twitterdemo.model.PostInfo;
 import com.ziio.twitterdemo.model.Ticket;
 import com.ziio.twitterdemo.util.StringUtil;
 
@@ -47,6 +56,7 @@ import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 
 public class IndexActivity extends AppCompatActivity {
@@ -54,7 +64,9 @@ public class IndexActivity extends AppCompatActivity {
     private List<Ticket> ticketList;
     private ListView lvTweets;
     private MyTweetAdapter adapter;
+
     private String myEmail;
+    private String userUID;
 
     private CosClient cosClient;
 
@@ -71,13 +83,16 @@ public class IndexActivity extends AppCompatActivity {
         // bundle
         Intent intent = getIntent();
         Bundle bundle = intent.getExtras();
-        myEmail = bundle.getString("email");
+        myEmail = "ziio";
+        userUID = "615644646";
+
         // init cosClient
         cosClient = new CosClient(this);
+        // init fireBase
+        firebaseDatabase = FirebaseDatabase.getInstance(GoogleConfig.REALTIME_DATABASE_URL);
+        myRef = firebaseDatabase.getReference();
         // dummy data
         ticketList.add(new Ticket("0" , "him" , "url" , "add"));
-        ticketList.add(new Ticket("0" , "him" , "url" , "ziio"));
-        ticketList.add(new Ticket("0" , "him" , "url" , "ziio"));
         ticketList.add(new Ticket("0" , "him" , "url" , "ziio"));
         // set listView Adapter
         adapter = new MyTweetAdapter(ticketList,this);
@@ -101,7 +116,7 @@ public class IndexActivity extends AppCompatActivity {
                 }
             }
         });
-
+        LoadPost();
     }
 
     class MyTweetAdapter extends BaseAdapter {
@@ -136,7 +151,8 @@ public class IndexActivity extends AppCompatActivity {
             if(myTweet.getTweetPersonUID().equals("add")){
                 View myView = LayoutInflater.from(context).inflate(R.layout.add_ticket, null);
                 // load add ticket
-                ImageView ivAttach = findViewById(R.id.iv_attach);
+                EditText etPost = myView.findViewById(R.id.etPost);
+                ImageView ivAttach = myView.findViewById(R.id.iv_attach);
                 ivAttach.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
@@ -144,19 +160,25 @@ public class IndexActivity extends AppCompatActivity {
                         loadImage();
                     }
                 });
-                ImageView ivPost = findViewById(R.id.iv_post);
+                ImageView ivPost = myView.findViewById(R.id.iv_post);
                 ivPost.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
-                        // upload the postInfo
-
+                        // upload the postInfo to database
+                        PostInfo postInfo = new PostInfo(userUID,etPost.getText().toString(),pictureURL);
+                        myRef.child("posts").push().setValue(postInfo);
                     }
                 });
                 return myView;
             }else{
                 View myView = LayoutInflater.from(context).inflate(R.layout.tweets_ticket, null);
-                // todo : work
                 // load tweet ticket
+                TextView tweetText = myView.findViewById(R.id.txt_tweet);
+                TextView txtUserName = myView.findViewById(R.id.txtUserName);
+                ImageView tweetImageView = myView.findViewById(R.id.tweet_picture);
+                txtUserName.setText(myTweet.getTweetPersonUID());
+                tweetText.setText(myTweet.getTweetText());
+                Picasso.with(context).load(myTweet.getTweetImageURL()).into(tweetImageView);
                 return myView;
             }
         }
@@ -209,5 +231,34 @@ public class IndexActivity extends AppCompatActivity {
                 }
             }
         });
+    }
+
+    // load postInfos from dataBase
+    private void LoadPost(){
+        myRef.child("posts")
+                .addValueEventListener(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                        try {
+                            // update the list
+                            HashMap<String , Object> map = (HashMap<String , Object>)dataSnapshot.getValue();
+                            for(String key : map.keySet()){
+                                // get the postInfo
+                                HashMap<String , String> postInfoMap = (HashMap<String , String>)map.get(key);
+                                String text = postInfoMap.get("text");
+                                ticketList.add(new Ticket(key,postInfoMap.get("text") , postInfoMap.get("postImage") , postInfoMap.get("userUID")));
+                            }
+                            // update the View
+                            adapter.notifyDataSetChanged();
+                        }catch (Exception exception){
+
+                        }
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                    }
+                });
     }
 }
