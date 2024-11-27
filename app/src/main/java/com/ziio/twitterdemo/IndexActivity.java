@@ -30,6 +30,9 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.AdView;
+import com.google.android.gms.ads.MobileAds;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -93,9 +96,12 @@ public class IndexActivity extends AppCompatActivity {
         myRef = firebaseDatabase.getReference();
         // dummy data
         ticketList.add(new Ticket("0" , "him" , "url" , "add"));
+        ticketList.add(new Ticket("0" , "him" , "url" , "ads"));
+
         // set listView Adapter
         adapter = new MyTweetAdapter(ticketList,this);
         lvTweets.setAdapter(adapter);
+
         // selectImage ResultCallBack
         activityResultLauncher  = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), new ActivityResultCallback<ActivityResult>() {
             @Override
@@ -172,6 +178,13 @@ public class IndexActivity extends AppCompatActivity {
             }
             else if(myTweet.getTweetPersonUID().equals("loading")){
                 View myView = LayoutInflater.from(context).inflate(R.layout.loading_ticket, null);
+                return myView;
+            }
+            else if(myTweet.getTweetPersonUID().equals("ads")){
+                View myView = LayoutInflater.from(context).inflate(R.layout.ads_ticket, null);
+                AdView mAdView = myView.findViewById(R.id.adView);
+                AdRequest adRequest = new AdRequest.Builder().build();
+                mAdView.loadAd(adRequest);
                 return myView;
             }
             else{
@@ -286,7 +299,11 @@ public class IndexActivity extends AppCompatActivity {
                     @Override
                     public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                         try {
-                            // update the list
+                            // clear the list
+                            ticketList.clear();
+                            ticketList.add(new Ticket("0","him","url","add"));
+                            ticketList.add(new Ticket("0","him","url","ads"));
+                            // fetch the new postList
                             HashMap<String , Object> map = (HashMap<String , Object>)dataSnapshot.getValue();
                             for(String key : map.keySet()){
                                 // get the postInfo
