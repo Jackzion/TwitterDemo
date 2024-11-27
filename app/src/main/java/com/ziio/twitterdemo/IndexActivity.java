@@ -174,11 +174,39 @@ public class IndexActivity extends AppCompatActivity {
                 View myView = LayoutInflater.from(context).inflate(R.layout.tweets_ticket, null);
                 // load tweet ticket
                 TextView tweetText = myView.findViewById(R.id.txt_tweet);
-                TextView txtUserName = myView.findViewById(R.id.txtUserName);
                 ImageView tweetImageView = myView.findViewById(R.id.tweet_picture);
-                txtUserName.setText(myTweet.getTweetPersonUID());
                 tweetText.setText(myTweet.getTweetText());
                 Picasso.with(context).load(myTweet.getTweetImageURL()).into(tweetImageView);
+                // load userInfo
+                ImageView ivImagePerson = myView.findViewById(R.id.ivImagePerson);
+                TextView txtUserName = myView.findViewById(R.id.txtUserName);
+                myRef.child("Users").child(myTweet.getTweetID())
+                        .addValueEventListener(new ValueEventListener() {
+                            @Override
+                            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                                try {
+                                    // update the list
+                                    HashMap<String , Object> map = (HashMap<String , Object>)dataSnapshot.getValue();
+                                    for(String key : map.keySet()){
+                                        String value = (String)map.get(key);
+                                        if(key.equals("profileImage")){
+                                            Picasso.with(context).load(value).into(ivImagePerson);
+                                        }else{
+                                            txtUserName.setText(value);
+                                        }
+                                    }
+                                    // update the View
+                                    adapter.notifyDataSetChanged();
+                                }catch (Exception exception){
+
+                                }
+                            }
+
+                            @Override
+                            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                            }
+                        });
                 return myView;
             }
         }
