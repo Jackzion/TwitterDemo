@@ -3,8 +3,12 @@
   <component name="DesignSurface">
     <option name="filePathToZoomLevelMap">
       <map>
+        <entry key="..\:/Android/WorkPlace/Learning/TwitterDemo/app/src/main/res/drawable/background.xml" value="0.2715" />
+        <entry key="..\:/Android/WorkPlace/Learning/TwitterDemo/app/src/main/res/layout/activity_index.xml" value="0.2128623188405797" />
         <entry key="..\:/Android/WorkPlace/Learning/TwitterDemo/app/src/main/res/layout/activity_login.xml" value="0.25" />
         <entry key="..\:/Android/WorkPlace/Learning/TwitterDemo/app/src/main/res/layout/activity_main.xml" value="0.2" />
+        <entry key="..\:/Android/WorkPlace/Learning/TwitterDemo/app/src/main/res/layout/activity_main2.xml" value="0.26666666666666666" />
+        <entry key="..\:/Android/WorkPlace/Learning/TwitterDemo/app/src/main/res/layout/add_ticket.xml" value="0.26666666666666666" />
       </map>
     </option>
   </component>
