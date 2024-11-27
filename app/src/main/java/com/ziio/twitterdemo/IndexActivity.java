@@ -16,6 +16,7 @@ import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
@@ -161,6 +162,8 @@ public class IndexActivity extends AppCompatActivity {
                 ivAttach.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
+                        // save the text you write
+                        
                         // load the image
                         loadImage();
                     }
@@ -219,10 +222,13 @@ public class IndexActivity extends AppCompatActivity {
                         });
                 // load like icon
                 ImageView ivLike = myView.findViewById(R.id.iv_like);
+                ivLike.setImageResource(R.drawable.like);
                 ivLike.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
-                        if(ivLike.getDrawable().getConstantState() == getResources().getDrawable(R.drawable.like).getConstantState()){
+                        Drawable currentDrawable = ivLike.getDrawable();
+                        Drawable likeDrawable = getResources().getDrawable(R.drawable.like);
+                        if(currentDrawable.getConstantState() == likeDrawable.getConstantState()){
                             ivLike.setImageResource(R.drawable.dolike);
                         }else{
                             ivLike.setImageResource(R.drawable.like);

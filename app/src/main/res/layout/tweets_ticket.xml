@@ -117,7 +117,7 @@
         <ImageView
             android:background="@drawable/background"
             android:adjustViewBounds="true"
-            android:scaleType="fitXY"
+            android:scaleType="centerInside"
             android:layout_width="fill_parent"
             android:src="@drawable/tweets"
             android:layout_marginLeft="5dp"
@@ -129,7 +129,8 @@
             android:layout_alignBottom="@+id/txtflollower"
             android:layout_weight="0"
             android:layout_marginBottom="1dp"
-            android:layout_height="100pt" />
+            android:layout_height="100pt"
+            />
 
         <LinearLayout
 

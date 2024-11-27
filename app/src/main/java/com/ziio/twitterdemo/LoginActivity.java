@@ -129,7 +129,7 @@ public class LoginActivity extends AppCompatActivity implements OnCompleteListen
     // login to fireBase by fireAuth
     private void loginToFireBase(String email ,String password){
         if(mAuth!=null){
-            mAuth.createUserWithEmailAndPassword(email,password)
+            mAuth.signInWithEmailAndPassword(email,password)
                     .addOnCompleteListener(this);
         }
     }
